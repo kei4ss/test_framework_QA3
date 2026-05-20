@@ -1,4 +1,5 @@
 # Framework de teste - Grupo C
+Framework de automação de testes baseado em Python.
 
 ## Membros
 - Ilmara Guimarães Soares
