@@ -1,1 +1,4 @@
 requests 
+pytest
+pylint
+python-dotenv
