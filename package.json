@@ -17,5 +17,9 @@
   "bugs": {
     "url": "https://github.com/kei4ss/test_framework_QA3/issues"
   },
-  "homepage": "https://github.com/kei4ss/test_framework_QA3#readme"
+  "homepage": "https://github.com/kei4ss/test_framework_QA3#readme",
+  "directories": {
+    "doc": "docs",
+    "test": "tests"
+  }
 }

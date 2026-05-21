@@ -1,4 +1,4 @@
-const { RequestManager } = require("./requestManager");
+const { RequestManager } = require("../infraestructure/requestManager");
 
 const rm = RequestManager.getInstance({
   baseURL: "https://fakestoreapi.com",
@@ -57,25 +57,3 @@ console.log("Stats:", RequestManager.getInstance().getStats());
 
 module.exports = { userService, productService, orderService };
 
-// ── Testes
-async function executarChamadas() {
-  
-  console.log("\n Executando chamadas simultâneas...");
-  
-  try {
-    const promessas = [
-      userService.listarUsuarios(),
-      productService.listarProdutos()
-    ];
-    console.log("Status atual da fila:", RequestManager.getInstance().getStats());
-
-    const [usuarios, produtos] = await Promise.all(promessas);
-    
-    console.log(`\n Número de usuários encontrados ${usuarios.length}.`);
-    console.log(`\n Numero de produtos encontrados ${produtos.length}.`);
-  } catch (error) {
-    console.error("\nErro na requisição:", error.message);
-  }
-}
-
-executarChamadas();
