@@ -1,3 +1,4 @@
+```mermaid
 classDiagram
     class settings {
         -__instance : settings
@@ -61,3 +62,4 @@ classDiagram
     settings --> GlobalConfig
     settings --> PerformanceConfig
     note for settings "Padrão Singleton"
+```
