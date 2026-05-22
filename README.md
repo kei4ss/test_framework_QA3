@@ -1,4 +1,4 @@
-# PyTFrame
+# Sentenela project
 Este projeto tem como objetivo a concepção, desenvolvimento e implementação de
 uma estrutura (framework) de automação para testes de API. O objetivo é criar uma
 ferramenta robusta, escalável e de fácil manutenção, capaz de validar não apenas as
