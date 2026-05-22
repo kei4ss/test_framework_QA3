@@ -3,24 +3,32 @@ import os
 
 root_dir = os.path.join(os.path.dirname(__file__), '../../')
 
-root_env_path = os.path.join(root_dir, '.env')
-dev_env_path = os.path.join(root_dir, '/environments/.env.dev')
-prod_env_path = os.path.join(root_dir, '/environments/.env.prod')
-staging_env_path = os.path.join(root_dir, '/environments/.env.staging')
-
 # Carregando as variáveis de ambiente do arquivo principal .env
+root_env_path = os.path.join(root_dir, '.env')
+if(not os.path.exists(root_env_path)):
+    raise FileNotFoundError(f"Arquivo .env principal não encontrado em: {root_env_path}\nCertifique-se de criar um arquivo .env na raiz do projeto com as variáveis de ambiente necessárias.")
 load_dotenv(dotenv_path=root_env_path)
 
-# Verifico qual ambiente está sendo executado e carrego as variáveis de ambiente correspondentes
-if os.getenv('MODE') == 'DEV':
-    load_dotenv(dotenv_path=dev_env_path)
-elif os.getenv('MODE') == 'PROD':
-    load_dotenv(dotenv_path=prod_env_path)
-elif os.getenv('MODE') == 'STAGING':
-    load_dotenv(dotenv_path=staging_env_path)
-else:
-    raise ValueError("MODE inválido. Use 'DEV', 'PROD' ou 'STAGING'.")
+# Carrega variaveis de ambiente específicas para cada ambiente (DEV, PROD, STAGING)
+def load_environment_variables(path, env_name):
+    if not os.path.exists(path):
+        raise FileNotFoundError(f"Arquivo .env de {env_name} não encontrado em: {path}\nCertifique-se de criar um arquivo .env para {env_name} com as variáveis de ambiente necessárias.")
+    load_dotenv(dotenv_path=path)
 
+match os.getenv('MODE'):
+    case 'DEV':
+        dev_env_path = os.path.join(root_dir, 'environments', 'dev','.env')
+        load_environment_variables(dev_env_path, 'desenvolvimento')
+    case 'PROD':
+        prod_env_path = os.path.join(root_dir, 'environments', 'prod','.env')
+        load_environment_variables(prod_env_path, 'produção')
+    case 'STAGING':
+        staging_env_path = os.path.join(root_dir, 'environments', 'staging','.env')
+        load_environment_variables(staging_env_path, 'staging')
+    case _:
+        raise ValueError("MODE inválido. Use 'DEV', 'PROD' ou 'STAGING'.")
+
+# Classe de configuração para acessar as variáveis de ambiente de forma estruturada
 class settings:
     __instace = None
     __initialized = False
@@ -44,11 +52,10 @@ class settings:
         self.__db_host = os.getenv('DB_HOST', 'localhost')
         self.__db_port = os.getenv('DB_PORT', '5432')
         self.__db_user = os.getenv('DB_USER', 'user')
-        self.__db_password = os.getenv('DB_PASSWORD', 'password')
+        self.__db_password = os.getenv('DB_PASSWORD')
         self.__db_name = os.getenv('DB_NAME', 'database')
 
         self.__api_base_url = os.getenv('API_BASE_URL', 'http://localhost:8000/api')
-        self.__api_key = os.getenv('API_KEY', '')
         self.__api_endpoints = os.getenv('API_ENDPOINTS', '').split(',')
 
         self.__timeout = int(os.getenv('TIMEOUT', '30'))
@@ -64,37 +71,44 @@ class settings:
         print(f"Configurações de banco de dados: {self.__db_host}:{self.__db_port} (Usuário: {self.__db_user})")
         print(f"Configurações de API: Base URL: {self.__api_base_url}, Endpoints: {self.__api_endpoints}")
 
+    def database_config(self):
+        if self.__db_password is None:
+            raise ValueError("A variável de ambiente DB_PASSWORD é obrigatória e não pode estar vazia.")
+        
+        return {
+            "host": self.__db_host,
+            "port": self.__db_port,
+            "user": self.__db_user,
+            "password": self.__db_password,
+            "name": self.__db_name
+        }
 
-    def get_mode(self):
-        return self.__mode
-    def get_log_level(self):
-        return self.__log_level
-    def get_app_name(self):
-        return self.__app_name
-    def get_app_version(self):
-        return self.__app_version
-    def get_timezone(self):
-        return self.__timezone
-    def get_default_language(self):
-        return self.__default_language
+    def api_config(self):
+        return {
+            "base_url": self.__api_base_url,
+            "endpoints": self.__api_endpoints
+        }
     
-    def get_db_host(self):
-        return self.__db_host
-    def get_db_port(self):
-        return self.__db_port
-    def get_db_user(self):
-        return self.__db_user
-    def get_db_password(self):
-        return self.__db_password
-    def get_db_name(self):
-        return self.__db_name
+    def global_config(self):
+        return {
+            "mode": self.__mode,
+            "log_level": self.__log_level,
+            "app_name": self.__app_name,
+            "app_version": self.__app_version,
+            "timezone": self.__timezone,
+            "default_language": self.__default_language
+        }
 
-    def get_api_base_url(self):
-        return self.__api_base_url
-    def get_api_key(self):
-        return self.__api_key
-    def get_api_endpoints(self):
-        return self.__api_endpoints
-    
-    def get_timeout(self):
-        return self.__timeout
+    def performance_config(self):
+        return {
+            "timeout": self.__timeout
+        }
+
+    def api_config(self):
+        if not self.__api_base_url:
+            raise ValueError("A variável de ambiente API_BASE_URL é obrigatória e não pode estar vazia.")
+        
+        return {
+            "base_url": self.__api_base_url,
+            "endpoints": self.__api_endpoints
+        }
