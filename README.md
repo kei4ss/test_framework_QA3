@@ -17,14 +17,16 @@ Framework de automação de testes baseado em Python.
 ```
 framework-automacao/
 ├── src/
+|   ├── config/            # Centralização de informações
+|   |   └── settings.py        # Classe que disponibiliza as configurações
 │   ├── infrastructure/    # Camada de infraestrutura
-│   ├── services/         # Camada de serviços
-│   └── utils/           # Utilitários gerais
+│   ├── services/          # Camada de serviços
+│   └── utils/             # Utilitários gerais
 ├── tests/               # Camada de testes
 │   ├── unit/
 │   ├── integration/
 │   └── e2e/
-├── config/              # Arquivos de configuração
+├── environments/        # Variáveis de ambiente para diferentes modos
 │   ├── dev/
 │   ├── staging/
 │   └── prod/
