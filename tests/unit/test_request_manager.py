@@ -5,6 +5,9 @@ from requests.exceptions import RequestException, Timeout
 
 from infraestructure.request_manager import RequestManager
 
+from config.config import API_BASE_URL
+from config.config import API_BASE_USERS_URL
+
 @pytest.fixture
 def request_manager():
     """
@@ -15,7 +18,7 @@ def request_manager():
     RequestManager._instance = None
 
     return RequestManager(
-        base_url="https://fakestoreapi.com",
+        base_url=API_BASE_URL,
         timeout=5,
     )
 
@@ -40,7 +43,7 @@ def test_build_url(request_manager):
 
     result = request_manager._build_url(endpoint)
 
-    assert result == "https://fakestoreapi.com/users"
+    assert result == API_BASE_USERS_URL
 
 
 @patch("requests.Session.request")
@@ -67,7 +70,7 @@ def test_get_request_success(mock_request, request_manager):
 
     mock_request.assert_called_once_with(
         method="GET",
-        url="https://fakestoreapi.com/users",
+        url=API_BASE_USERS_URL,
         headers={"Content-Type": "application/json"},
         params=None,
         data=None,
@@ -257,7 +260,7 @@ def test_custom_headers(mock_request, request_manager):
 
     mock_request.assert_called_once_with(
         method="GET",
-        url="https://fakestoreapi.com/users",
+        url=API_BASE_USERS_URL,
         headers={
             "Content-Type": "application/json",
             "Authorization": "Bearer token",

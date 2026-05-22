@@ -21,7 +21,9 @@ class RequestManager:
         timeout: int = 30,
         default_headers: Optional[Dict[str, str]] = None,
     ) -> None:
-
+        """
+         Inicializa a instância única do RequestManager.
+        """
 
         if hasattr(self, "_initialized") and self._initialized:
             return
@@ -39,11 +41,15 @@ class RequestManager:
         self._initialized = True
 
     def _build_url(self, endpoint: str) -> str:
-
+        """
+        Formata e constrói a URL completa combinando a base_url e o endpoint.
+        """
         return f"{self.base_url}/{endpoint.lstrip('/')}"
 
     def _handle_response(self, response: Response) -> Dict[str, Any]:
-
+        """
+         Processa a resposta HTTP, convertendo o conteúdo para JSON ou texto.
+        """
         try:
             response_data = response.json()
         except ValueError:
@@ -64,7 +70,9 @@ class RequestManager:
         data: Optional[Dict[str, Any]] = None,
         json: Optional[Dict[str, Any]] = None,
     ) -> Dict[str, Any]:
-
+        """
+         Método interno centralizado que executa a requisição HTTP e trata exceções.
+        """
         url = self._build_url(endpoint)
 
         request_headers = self.default_headers.copy()
@@ -104,9 +112,9 @@ class RequestManager:
         headers: Optional[Dict[str, str]] = None,
     ) -> Dict[str, Any]:
         """
-        Executa requisição GET.
-        """
+        Executa uma requisição HTTP GET.
 
+        """
         return self._request(
             method="GET",
             endpoint=endpoint,
@@ -121,7 +129,9 @@ class RequestManager:
         json: Optional[Dict[str, Any]] = None,
         headers: Optional[Dict[str, str]] = None,
     ) -> Dict[str, Any]:
-
+        """
+                Executa uma requisição HTTP POST.tq
+      """
         return self._request(
             method="POST",
             endpoint=endpoint,
@@ -137,7 +147,10 @@ class RequestManager:
         json: Optional[Dict[str, Any]] = None,
         headers: Optional[Dict[str, str]] = None,
     ) -> Dict[str, Any]:
+        """
+                Executa uma requisição HTTP PUT.
 
+       """
         return self._request(
             method="PUT",
             endpoint=endpoint,
@@ -153,7 +166,9 @@ class RequestManager:
         json: Optional[Dict[str, Any]] = None,
         headers: Optional[Dict[str, str]] = None,
     ) -> Dict[str, Any]:
-
+        """
+                Executa uma requisição HTTP PATCH.
+        """
         return self._request(
             method="PATCH",
             endpoint=endpoint,
@@ -167,8 +182,9 @@ class RequestManager:
         endpoint: str,
         headers: Optional[Dict[str, str]] = None,
     ) -> Dict[str, Any]:
-
-
+        """
+                Executa uma requisição HTTP DELETE.
+         """
         return self._request(
             method="DELETE",
             endpoint=endpoint,
