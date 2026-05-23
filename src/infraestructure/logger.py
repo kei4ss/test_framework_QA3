@@ -1,9 +1,9 @@
 import logging
 import logging.handlers
 import os
-from config.settings import settings
+from src.config.settings import settings
 
-from config.logging_config import LOG_FORMAT, DEFAULT_MAX_BYTES, DEFAULT_BACKUP_COUNT, SensitiveDataFormatter, LOG_DATE_FORMAT
+from src.config.logging_config import LOG_FORMAT, DEFAULT_MAX_BYTES, DEFAULT_BACKUP_COUNT, SensitiveDataFormatter, LOG_DATE_FORMAT
 
 class Logger:
     __instance = None
@@ -17,7 +17,7 @@ class Logger:
     def __init__(self, log_level: str = None, log_dir: str = None):
         if self.__initialized:
             resolved_level = log_level or settings().global_config().get("log_level", "INFO")
-            resolved_dir = log_dir or os.path.join(os.path.dirname(__file__), '../../logs')
+            resolved_dir = log_dir or os.path.join(os.path.dirname(__file__), '../../../logs')
         
             numeric_level = getattr(logging, resolved_level.upper(), logging.INFO)
            
@@ -82,5 +82,4 @@ class Logger:
         
     def get_logger(self) -> logging.Logger:
         return self.__logger
-
 
