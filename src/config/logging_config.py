@@ -19,7 +19,7 @@ SENSITIVE_PATTERNS = [
     (r'(?i)(password|senha|passwd)\s*[=:]\s*\S+', r'\1=***MASKED***'),
     (r'(?i)(token|api_key|apikey|secret|authorization)\s*[=:]\s*\S+',
      r'\1=***MASKED***'),
-    (r'(?i)(credit_card|cc_number|card_number)\s*[=:]\s*\S+', r'\1=***MASKED***')
+    (r'\b\d{13,19}\b', '***CARD***')
 ]
 
 class SensitiveDataFormatter(logging.Formatter):
