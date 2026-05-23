@@ -1,0 +1,8 @@
+id,name,email,password,age,role,active
+1,João Silva,joao.silva@example.com,senha123secure,28,admin,true
+2,Maria Santos,maria.santos@example.com,senhaSegura456,32,user,true
+3,Carlos Oliveira,carlos.oliveira@example.com,outraSenha789,25,user,false
+4,Ana Costa,ana.costa@example.com,senhaForte321,29,moderator,true
+5,Pedro Ferreira,pedro.ferreira@example.com,senhaCompleta654,31,user,true
+6,Lucia Martins,lucia.martins@example.com,senhaLucia999,27,user,true
+7,Roberto Alves,roberto.alves@example.com,senhaRobert111,33,admin,true

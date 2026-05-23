@@ -1,0 +1,38 @@
+[
+  {
+    "id": 1,
+    "name": "Produto A",
+    "description": "Descrição do Produto A",
+    "price": 99.99,
+    "stock": 50,
+    "category": "eletrônicos",
+    "available": true
+  },
+  {
+    "id": 2,
+    "name": "Produto B",
+    "description": "Descrição do Produto B",
+    "price": 149.50,
+    "stock": 30,
+    "category": "eletrônicos",
+    "available": true
+  },
+  {
+    "id": 3,
+    "name": "Produto C",
+    "description": "Descrição do Produto C",
+    "price": 49.99,
+    "stock": 0,
+    "category": "acessórios",
+    "available": false
+  },
+  {
+    "id": 4,
+    "name": "Produto D",
+    "description": "Descrição do Produto D",
+    "price": 199.99,
+    "stock": 15,
+    "category": "eletrônicos",
+    "available": true
+  }
+]
