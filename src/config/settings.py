@@ -1,32 +1,58 @@
-from dotenv import load_dotenv
+﻿from dotenv import load_dotenv
 import os
 
 root_dir = os.path.join(os.path.dirname(__file__), '../../')
 
-# Carregando as variáveis de ambiente do arquivo principal .env
-root_env_path = os.path.join(root_dir, '.env')
-if(not os.path.exists(root_env_path)):
-    raise FileNotFoundError(f"Arquivo .env principal não encontrado em: {root_env_path}\nCertifique-se de criar um arquivo .env na raiz do projeto com as variáveis de ambiente necessárias.")
+
+def resolve_env_file(base_dir, file_name='.env'):
+    candidates = [
+        os.path.join(base_dir, file_name),
+        os.path.join(base_dir, '.env.test'),
+        os.path.join(base_dir, '.env.example'),
+    ]
+    for path in candidates:
+        if os.path.exists(path):
+            return path
+    return None
+
+
+# Carregando as variáveis de ambiente do arquivo principal
+root_env_path = resolve_env_file(root_dir, '.env')
+if root_env_path is None:
+    raise FileNotFoundError(
+        f"Arquivo .env principal não encontrado em: {os.path.join(root_dir, '.env')}\n"
+        "Certifique-se de criar um arquivo .env/.env.test/.env.example na raiz do projeto."
+    )
 load_dotenv(dotenv_path=root_env_path)
 
-# Carrega variaveis de ambiente específicas para cada ambiente (DEV, PROD, STAGING)
-def load_environment_variables(path, env_name):
-    if not os.path.exists(path):
-        raise FileNotFoundError(f"Arquivo .env de {env_name} não encontrado em: {path}\nCertifique-se de criar um arquivo .env para {env_name} com as variáveis de ambiente necessárias.")
-    load_dotenv(dotenv_path=path)
 
-match os.getenv('MODE'):
+# Carrega variaveis de ambiente específicas para cada ambiente (DEV, PROD, STAGING)
+def load_environment_variables(env_dir, env_name):
+    env_path = resolve_env_file(env_dir, '.env')
+    if env_path is None:
+        raise FileNotFoundError(
+            f"Arquivo .env de {env_name} não encontrado em: {os.path.join(env_dir, '.env')}\n"
+            f"Certifique-se de criar um arquivo .env/.env.test/.env.example para {env_name}."
+        )
+    load_dotenv(dotenv_path=env_path)
+
+
+raw_mode = (os.getenv('MODE') or '').strip().upper()
+mode = 'DEV' if not raw_mode or raw_mode.startswith('#') else raw_mode
+
+match mode:
     case 'DEV':
-        dev_env_path = os.path.join(root_dir, 'environments', 'dev','.env')
+        dev_env_path = os.path.join(root_dir, 'environments', 'dev')
         load_environment_variables(dev_env_path, 'desenvolvimento')
     case 'PROD':
-        prod_env_path = os.path.join(root_dir, 'environments', 'prod','.env')
+        prod_env_path = os.path.join(root_dir, 'environments', 'prod')
         load_environment_variables(prod_env_path, 'produção')
     case 'STAGING':
-        staging_env_path = os.path.join(root_dir, 'environments', 'staging','.env')
+        staging_env_path = os.path.join(root_dir, 'environments', 'staging')
         load_environment_variables(staging_env_path, 'staging')
     case _:
         raise ValueError("MODE inválido. Use 'DEV', 'PROD' ou 'STAGING'.")
+
 
 # Classe de configuração para acessar as variáveis de ambiente de forma estruturada
 class settings:
@@ -37,11 +63,11 @@ class settings:
         if cls.__instace is None:
             cls.__instace = super().__new__(cls)
         return cls.__instace
-    
+
     def __init__(self):
         if self.__initialized:
             return
-       
+
         self.__mode = os.getenv('MODE')
         self.__log_level = os.getenv('LOG_LEVEL', 'INFO')
         self.__app_name = os.getenv('APP_NAME', "Minha Aplicação")
@@ -74,7 +100,7 @@ class settings:
     def database_config(self):
         if self.__db_password is None:
             raise ValueError("A variável de ambiente DB_PASSWORD é obrigatória e não pode estar vazia.")
-        
+
         return {
             "host": self.__db_host,
             "port": self.__db_port,
@@ -88,7 +114,7 @@ class settings:
             "base_url": self.__api_base_url,
             "endpoints": self.__api_endpoints
         }
-    
+
     def global_config(self):
         return {
             "mode": self.__mode,
@@ -107,7 +133,7 @@ class settings:
     def api_config(self):
         if not self.__api_base_url:
             raise ValueError("A variável de ambiente API_BASE_URL é obrigatória e não pode estar vazia.")
-        
+
         return {
             "base_url": self.__api_base_url,
             "endpoints": self.__api_endpoints
