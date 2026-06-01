@@ -1,3 +1,4 @@
+<<<<<<< HEAD
 from typing import Optional, Dict, Any
 
 import requests
@@ -190,3 +191,8 @@ class RequestManager:
             endpoint=endpoint,
             headers=headers,
         )
+=======
+from src.infrastructure.request_manager import RequestManager
+
+__all__ = ["RequestManager"]
+>>>>>>> 956466624e2ec2ace0b8824d027e273615dae78f

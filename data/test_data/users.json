@@ -1,0 +1,47 @@
+[
+  {
+    "id": 1,
+    "name": "João Silva",
+    "email": "joao.silva@example.com",
+    "password": "senha123secure",
+    "age": 28,
+    "role": "admin",
+    "active": true
+  },
+  {
+    "id": 2,
+    "name": "Maria Santos",
+    "email": "maria.santos@example.com",
+    "password": "senhaSegura456",
+    "age": 32,
+    "role": "user",
+    "active": true
+  },
+  {
+    "id": 3,
+    "name": "Carlos Oliveira",
+    "email": "carlos.oliveira@example.com",
+    "password": "outraSenha789",
+    "age": 25,
+    "role": "user",
+    "active": false
+  },
+  {
+    "id": 4,
+    "name": "Ana Costa",
+    "email": "ana.costa@example.com",
+    "password": "senhaForte321",
+    "age": 29,
+    "role": "moderator",
+    "active": true
+  },
+  {
+    "id": 5,
+    "name": "Pedro Ferreira",
+    "email": "pedro.ferreira@example.com",
+    "password": "senhaCompleta654",
+    "age": 31,
+    "role": "user",
+    "active": true
+  }
+]

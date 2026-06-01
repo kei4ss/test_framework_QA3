@@ -401,4 +401,4 @@ def test_auth_header_is_applied():
         manager.get("/secure")
 
     assert request_mock.call_args.kwargs["headers"]["Authorization"] == "Bearer abc"
->>>>>>> 956466624e2ec2ace0b8824d027e273615dae78f
+>>>>>>> 2d7ec96db21469bc0b4313b039d388cd555682f3
