@@ -1,7 +1,13 @@
 """
-Testes Unitários para o Data Provider
-Valida funcionalidade, validação de dados e fallback entre fontes
+Testes Unitários para o Data Provider.
+
+Valida:
+- Leitura de arquivos (JSON, CSV)
+- Validação de dados
+- Fallback entre fontes
+- Padrão Singleton do DataProvider
 """
+
 import pytest
 import os
 import json
@@ -16,8 +22,9 @@ from src.utils.data_provider import (
 from src.config.data_provider_config import DataProviderConfig, DataSourceType
 
 
+@pytest.mark.unit
 class TestFileReader:
-    """Testes para a classe FileReader"""
+    """Testes para a classe FileReader."""
     
     def test_read_json_success(self):
         """Testa leitura bem-sucedida de arquivo JSON"""
@@ -90,8 +97,9 @@ class TestFileReader:
         assert 'users.json' in files or 'users.csv' in files
 
 
+@pytest.mark.unit
 class TestDataValidator:
-    """Testes para a classe DataValidator"""
+    """Testes para a classe DataValidator."""
     
     def test_email_validator_valid(self):
         """Testa validação de e-mail válido"""
@@ -168,8 +176,9 @@ class TestDataValidator:
         assert is_valid is False
 
 
+@pytest.mark.unit
 class TestDataProvider:
-    """Testes para a classe DataProvider"""
+    """Testes para a classe DataProvider."""
     
     def test_singleton_instance(self):
         """Testa que DataProvider é Singleton"""
@@ -328,8 +337,9 @@ class TestDataProvider:
         assert isinstance(errors, list)
 
 
+@pytest.mark.unit
 class TestJSONDataStrategy:
-    """Testes para a estratégia JSON"""
+    """Testes para a estratégia JSON."""
     
     def test_strategy_is_available(self):
         """Testa verificação de disponibilidade"""
@@ -347,8 +357,9 @@ class TestJSONDataStrategy:
         assert len(data) > 0
 
 
+@pytest.mark.unit
 class TestCSVDataStrategy:
-    """Testes para a estratégia CSV"""
+    """Testes para a estratégia CSV."""
     
     def test_strategy_is_available(self):
         """Testa verificação de disponibilidade"""
@@ -366,8 +377,9 @@ class TestCSVDataStrategy:
         assert len(data) > 0
 
 
+@pytest.mark.unit
 class TestHardcodedDataStrategy:
-    """Testes para a estratégia Hardcoded"""
+    """Testes para a estratégia Hardcoded."""
     
     def test_strategy_is_available(self):
         """Sempre disponível"""
@@ -396,8 +408,9 @@ class TestHardcodedDataStrategy:
         assert data[0]['role'] == 'admin'
 
 
+@pytest.mark.unit
 class TestDataProviderConfig:
-    """Testes para a configuração do Data Provider"""
+    """Testes para a configuração do Data Provider."""
     
     def test_config_singleton(self):
         """Testa que Config é Singleton"""

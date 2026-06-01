@@ -1,4 +1,8 @@
-"""Testes de integração entre componentes centrais do framework."""
+"""Testes de integração entre componentes centrais do framework.
+
+Valida que os componentes principais (RequestManager, DataProvider, Logger)
+funcionam corretamente quando integrados.
+"""
 
 from pathlib import Path
 
@@ -10,23 +14,8 @@ from src.infrastructure.request_manager import RequestManager
 from src.utils.data_provider import DataProvider
 
 
-@pytest.fixture(autouse=True)
-def reset_singletons():
-    """Reseta singletons para garantir isolamento entre cenários."""
-    RequestManager._reset_instance()
-    DataProvider._instance = None
-    DataProvider._initialized = False
-    Logger._Logger__instance = None
-    Logger._Logger__initialized = False
-    yield
-    RequestManager._reset_instance()
-    DataProvider._instance = None
-    DataProvider._initialized = False
-    Logger._Logger__instance = None
-    Logger._Logger__initialized = False
-
-
 def _build_payload_from_provider():
+    """Constrói payload de usuário a partir do DataProvider."""
     provider = DataProvider()
     user = provider.get_data(
         source=DataSourceType.HARDCODED,
@@ -39,56 +28,79 @@ def _build_payload_from_provider():
     }
 
 
-def test_integracao_request_manager_logger_gera_log(tmp_path):
-    """Valida que uma chamada HTTP via RequestManager é registrada no Logger."""
-    logger = Logger(log_level="INFO", log_dir=str(tmp_path))
-    rm = RequestManager(
-        base_url="https://jsonplaceholder.typicode.com",
-        timeout=15,
-        logger=logger,
-    )
-
-    response = rm.get("/users/1")
-
-    assert response.status_code == 200
-    log_content = Path(tmp_path / "sentinela.log").read_text(encoding="utf-8")
-    assert "HTTP GET https://jsonplaceholder.typicode.com/users/1" in log_content
-    assert "200" in log_content
-
-
-def test_integracao_request_manager_data_provider_post():
-    """Valida uso de dados do DataProvider em POST via RequestManager."""
-    rm = RequestManager(
-        base_url="https://jsonplaceholder.typicode.com",
-        timeout=15,
-    )
-    payload = _build_payload_from_provider()
-
-    response = rm.post("/users", json=payload)
-    body = response.json()
-
-    assert response.status_code == 201
-    assert body["name"] == payload["name"]
-    assert body["email"] == payload["email"]
+@pytest.mark.integration
+class TestRequestManagerAndLoggerIntegration:
+    """Testes de integração entre RequestManager e Logger."""
+    
+    def test_should_log_http_request_when_request_manager_makes_call(self, tmp_path):
+        """Validar que RequestManager registra requisições no Logger."""
+        # Arrange
+        logger = Logger(log_level="INFO", log_dir=str(tmp_path))
+        rm = RequestManager(
+            base_url="https://jsonplaceholder.typicode.com",
+            timeout=15,
+            logger=logger,
+        )
+        
+        # Act
+        response = rm.get("/users/1")
+        
+        # Assert
+        assert response.status_code == 200
+        log_content = Path(tmp_path / "sentinela.log").read_text(encoding="utf-8")
+        assert "HTTP GET https://jsonplaceholder.typicode.com/users/1" in log_content
+        assert "200" in log_content
 
 
-def test_fluxo_completo_data_request_response_logger_assertions(tmp_path):
-    """Valida o fluxo completo: Data -> Request -> Response -> Logger -> Assertions."""
-    logger = Logger(log_level="INFO", log_dir=str(tmp_path))
-    rm = RequestManager(
-        base_url="https://jsonplaceholder.typicode.com",
-        timeout=15,
-        logger=logger,
-    )
-    payload = _build_payload_from_provider()
+@pytest.mark.integration
+class TestRequestManagerAndDataProviderIntegration:
+    """Testes de integração entre RequestManager e DataProvider."""
+    
+    def test_should_post_user_data_from_data_provider(self):
+        """Validar que dados do DataProvider funcionam com RequestManager."""
+        # Arrange
+        rm = RequestManager(
+            base_url="https://jsonplaceholder.typicode.com",
+            timeout=15,
+        )
+        payload = _build_payload_from_provider()
+        
+        # Act
+        response = rm.post("/users", json=payload)
+        body = response.json()
+        
+        # Assert
+        assert response.status_code == 201
+        assert body["name"] == payload["name"]
+        assert body["email"] == payload["email"]
 
-    response = rm.post("/users", json=payload)
-    body = response.json()
 
-    assert response.status_code == 201
-    assert body["name"] == payload["name"]
-    assert body["email"] == payload["email"]
+@pytest.mark.integration
+class TestFullComponentIntegration:
+    """Testes de integração completa entre todos os componentes."""
+    
+    def test_should_complete_full_flow_data_request_response_logging(self, tmp_path):
+        """Validar fluxo completo: Data → Request → Response → Logger → Assertions."""
+        # Arrange
+        logger = Logger(log_level="INFO", log_dir=str(tmp_path))
+        rm = RequestManager(
+            base_url="https://jsonplaceholder.typicode.com",
+            timeout=15,
+            logger=logger,
+        )
+        payload = _build_payload_from_provider()
+        
+        # Act
+        response = rm.post("/users", json=payload)
+        body = response.json()
+        
+        # Assert: Response
+        assert response.status_code == 201
+        assert body["name"] == payload["name"]
+        assert body["email"] == payload["email"]
+        
+        # Assert: Logging
+        log_content = Path(tmp_path / "sentinela.log").read_text(encoding="utf-8")
+        assert "HTTP POST https://jsonplaceholder.typicode.com/users" in log_content
+        assert "201" in log_content
 
-    log_content = Path(tmp_path / "sentinela.log").read_text(encoding="utf-8")
-    assert "HTTP POST https://jsonplaceholder.typicode.com/users" in log_content
-    assert "201" in log_content

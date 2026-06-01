@@ -1,4 +1,8 @@
-"""Teste E2E do fluxo de ciclo de vida de usuário com JSONPlaceholder."""
+"""Testes E2E do fluxo de ciclo de vida de usuário.
+
+Este módulo valida fluxos completos que envolvem múltiplas operações
+(CREATE, READ, UPDATE, DELETE) contra a API JSONPlaceholder.
+"""
 
 from pathlib import Path
 
@@ -10,57 +14,60 @@ from src.infrastructure.request_manager import RequestManager
 from src.utils.data_provider import DataProvider
 
 
-@pytest.fixture(autouse=True)
-def reset_singletons():
-    RequestManager._reset_instance()
-    DataProvider._instance = None
-    DataProvider._initialized = False
-    Logger._Logger__instance = None
-    Logger._Logger__initialized = False
-    yield
-    RequestManager._reset_instance()
-    DataProvider._instance = None
-    DataProvider._initialized = False
-    Logger._Logger__instance = None
-    Logger._Logger__initialized = False
+@pytest.mark.e2e
+class TestUserLifecycle:
+    """Testes do ciclo de vida completo de usuários."""
+    
+    def test_should_complete_full_user_lifecycle_create_update_delete(self, tmp_path):
+        """Teste E2E: obter dado → criar → atualizar → deletar → validar logs."""
+        # Arrange
+        provider = DataProvider()
+        seed_user = provider.get_data(
+            source=DataSourceType.HARDCODED,
+            identifier="default_user",
+        )[0]
+        create_payload = {
+            "name": seed_user["name"],
+            "username": "e2e_user_atividade5",
+            "email": seed_user["email"],
+        }
+        
+        logger = Logger(log_level="INFO", log_dir=str(tmp_path))
+        rm = RequestManager(
+            base_url="https://jsonplaceholder.typicode.com",
+            timeout=15,
+            logger=logger,
+        )
+        
+        # Act: CREATE
+        created_response = rm.post("/users", json=create_payload)
+        created_body = created_response.json()
+        
+        # Assert: CREATE
+        assert created_response.status_code == 201
+        assert created_body["name"] == create_payload["name"]
+        assert created_body["email"] == create_payload["email"]
+        
+        # Act: UPDATE
+        update_payload = dict(create_payload)
+        update_payload["name"] = "e2e_user_updated"
+        updated_response = rm.put("/users/1", json=update_payload)
+        updated_body = updated_response.json()
+        
+        # Assert: UPDATE
+        assert updated_response.status_code == 200
+        assert updated_body["name"] == "e2e_user_updated"
+        assert updated_body["email"] == update_payload["email"]
+        
+        # Act: DELETE
+        deleted_response = rm.delete("/users/1")
+        
+        # Assert: DELETE
+        assert deleted_response.status_code in (200, 204)
+        
+        # Assert: LOGGING
+        log_content = Path(tmp_path / "sentinela.log").read_text(encoding="utf-8")
+        assert "HTTP POST https://jsonplaceholder.typicode.com/users" in log_content
+        assert "HTTP PUT https://jsonplaceholder.typicode.com/users/1" in log_content
+        assert "HTTP DELETE https://jsonplaceholder.typicode.com/users/1" in log_content
 
-
-def test_fluxo_e2e_ciclo_de_vida_usuario(tmp_path):
-    """Fluxo completo E2E: obter dado -> criar -> atualizar -> deletar -> validar logs."""
-    provider = DataProvider()
-    seed_user = provider.get_data(
-        source=DataSourceType.HARDCODED,
-        identifier="default_user",
-    )[0]
-    payload = {
-        "name": seed_user["name"],
-        "username": "e2e_user_atividade5",
-        "email": seed_user["email"],
-    }
-
-    logger = Logger(log_level="INFO", log_dir=str(tmp_path))
-    rm = RequestManager(
-        base_url="https://jsonplaceholder.typicode.com",
-        timeout=15,
-        logger=logger,
-    )
-
-    created = rm.post("/users", json=payload)
-    created_body = created.json()
-    assert created.status_code == 201
-    assert created_body["name"] == payload["name"]
-
-    updated_payload = dict(payload)
-    updated_payload["name"] = "e2e_user_updated"
-    updated = rm.put("/users/1", json=updated_payload)
-    updated_body = updated.json()
-    assert updated.status_code == 200
-    assert updated_body["name"] == "e2e_user_updated"
-
-    deleted = rm.delete("/users/1")
-    assert deleted.status_code in (200, 204)
-
-    log_content = Path(tmp_path / "sentinela.log").read_text(encoding="utf-8")
-    assert "HTTP POST https://jsonplaceholder.typicode.com/users" in log_content
-    assert "HTTP PUT https://jsonplaceholder.typicode.com/users/1" in log_content
-    assert "HTTP DELETE https://jsonplaceholder.typicode.com/users/1" in log_content
