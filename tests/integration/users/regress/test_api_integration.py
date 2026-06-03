@@ -4,8 +4,8 @@ import pytest
 from requests import RequestException
 
 from src.config.data_provider_config import DataSourceType
-from src.infraestructure.logger import Logger
-from src.infrastructure.request_manager import RequestManager
+from src.infrastructure.logger.logger import Logger
+from src.infrastructure.requestManager.request_manager import RequestManager
 from src.utils.data_provider import DataProvider
 
 

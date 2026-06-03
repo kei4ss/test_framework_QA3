@@ -55,7 +55,7 @@ match mode:
 
 
 # Classe de configuração para acessar as variáveis de ambiente de forma estruturada
-class settings:
+class Settings:
     __instace = None
     __initialized = False
 
@@ -114,8 +114,18 @@ class settings:
             "base_url": self.__api_base_url,
             "endpoints": self.__api_endpoints
         }
-
+ 
     def global_config(self):
+        """
+        Retorna as configurações gerais da aplicação em forma de dicionário.            \n
+        Esses são os campos disponíveis da resposta:                                    \n
+            -> mode              : Modo no qual a aplicação foi iniciada [DEV, PROD...] 
+            -> log_level         : Nível de log que é necessário [DEBBUG, ALERT]        
+            -> app_name          : Nome da aplicação                                    
+            -> app_version       : Versão da aplicação                                     
+            -> timezone          : Fuso-horário                                         
+            -> default_language  : Linguagem para as saídas do sistema                  
+        """
         return {
             "mode": self.__mode,
             "log_level": self.__log_level,

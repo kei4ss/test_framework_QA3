@@ -4,12 +4,12 @@ from typing import Any, Dict, Optional
 import requests
 
 try:
-    from src.config.settings import settings
+    from src.config.settings import Settings
 except Exception:  # pragma: no cover - defensive fallback
-    settings = None
+    Settings = None
 
 try:
-    from src.infraestructure.logger import Logger
+    from src.infrastructure.logger.logger import Logger
 except Exception:  # pragma: no cover - defensive fallback
     Logger = None
 
@@ -141,10 +141,10 @@ class RequestManager:
             return None
 
     def _load_defaults_from_settings(self):
-        if settings is None:
+        if Settings is None:
             return None, 30
         try:
-            cfg = settings()
+            cfg = Settings()
             api_cfg = cfg.api_config()
             perf_cfg = cfg.performance_config()
             return api_cfg.get("base_url"), perf_cfg.get("timeout", 30)

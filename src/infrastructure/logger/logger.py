@@ -1,7 +1,7 @@
 import logging
 import logging.handlers
 import os
-from src.config.settings import settings
+from src.config.settings import Settings
 from src.config.logging_config import (
     ERROR_LOG_FILENAME, GENERAL_LOG_FILENAME, LOG_FORMAT, LOG_DATE_FORMAT,
     MAX_BYTES, BACKUP_COUNT,
@@ -24,7 +24,7 @@ class Logger:
 
         resolved_level = (
             log_level
-            or settings().global_config().get("log_level", "INFO")
+            or Settings().global_config().get("log_level", "INFO")
         )
         resolved_dir = (
             log_dir

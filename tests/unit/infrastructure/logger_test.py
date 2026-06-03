@@ -3,7 +3,7 @@ import logging.handlers
 import re
 import pytest
 
-from src.infraestructure.logger import Logger
+from src.infrastructure.logger.logger import Logger
 
 @pytest.fixture(autouse=True)
 def reset_logger_singleton():
