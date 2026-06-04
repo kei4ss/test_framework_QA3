@@ -81,7 +81,7 @@ Parâmetro do construtor  >  settings().global_config()  >  Valor padrão do có
 | `ERROR`    | 40            | Requisição falhou, assertion quebrou, operação impossível |
 | `CRITICAL` | 50            | Sistema não consegue continuar, configuração ausente |
 
-> Mensagens do nível configurado **e acima** são registradas.
+> Mensagens do nível configurado **a acima** são registradas.
 > Ex.: com `LOG_LEVEL=WARNING`, apenas WARNING, ERROR e CRITICAL aparecem.
 
 ---

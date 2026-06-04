@@ -2,3 +2,4 @@ requests
 pytest
 pylint
 python-dotenv
+reportlab
