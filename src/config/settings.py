@@ -7,7 +7,7 @@ root_dir = os.path.join(os.path.dirname(__file__), '../../')
 def resolve_env_file(base_dir, file_name='.env'):
     candidates = [
         os.path.join(base_dir, file_name),
-        os.path.join(base_dir, '.env.test'),
+        #os.path.join(base_dir, '.env.test'),
         os.path.join(base_dir, '.env.example'),
     ]
     for path in candidates:

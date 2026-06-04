@@ -6,6 +6,10 @@ on:
   pull_request:
     branches: [main, develop]
 
+env:
+  API_BASE_URL: https://fakestoreapi.com
+  TIMEOUT: 30
+
 jobs:
   lint:
     name: Lint (pylint)
