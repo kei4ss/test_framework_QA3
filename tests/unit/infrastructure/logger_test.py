@@ -1,3 +1,15 @@
+"""
+Testes unitários para a classe Logger.
+
+Cobre:
+- Padrão Singleton
+- Criação de arquivos de log
+- Escrita de logs em múltiplos níveis
+- Formatação de mensagens
+- Mascaramento de dados sensíveis
+- Logging de requisições HTTP
+"""
+
 import logging
 import logging.handlers
 import re
@@ -5,198 +17,345 @@ import pytest
 
 from src.infrastructure.logger.logger import Logger
 
-@pytest.fixture(autouse=True)
-def reset_logger_singleton():
-    original_instance = Logger._Logger__instance
-    original_initialized = Logger._Logger__initialized
 
+def _reset_logger_singleton():
+    """Reseta a instância do Logger para testes isolados."""
     Logger._Logger__instance = None
     Logger._Logger__initialized = False
-
-    yield
-
-    Logger._Logger__instance = original_instance
-    Logger._Logger__initialized = original_initialized
-
     test_logger = logging.getLogger("SentinelaLogger")
     for handler in test_logger.handlers[:]:
         handler.close()
         test_logger.removeHandler(handler)
 
+
+@pytest.mark.unit
 class TestLoggerSingleton:
-
-    def test_mesma_instancia_em_multiplas_chamadas(self, tmp_path):
-        log_a = Logger(log_level="INFO", log_dir=str(tmp_path))
-        log_b = Logger(log_level="INFO", log_dir=str(tmp_path))
-
-        assert log_a is log_b
-
-    def test_segunda_instancia_ignora_parametros_diferentes(self, tmp_path):
+    """Testes do padrão Singleton do Logger."""
+    
+    def setup_method(self):
+        """Limpa singleton antes de cada teste."""
+        _reset_logger_singleton()
+    
+    def test_should_return_same_instance_when_instantiated_multiple_times(self, tmp_path):
+        """Múltiplas instâncias devem retornar o mesmo objeto."""
+        # Act
+        logger_a = Logger(log_level="INFO", log_dir=str(tmp_path))
+        logger_b = Logger(log_level="INFO", log_dir=str(tmp_path))
+        
+        # Assert
+        assert logger_a is logger_b
+    
+    def test_should_ignore_different_parameters_on_second_instantiation(self, tmp_path):
+        """Segunda instância deve ignorar parâmetros diferentes."""
+        # Arrange
         Logger(log_level="INFO", log_dir=str(tmp_path))
-
-        log_b = Logger(log_level="DEBUG", log_dir=str(tmp_path))
-
-        internal = log_b.get_logger()
+        
+        # Act
+        logger_b = Logger(log_level="DEBUG", log_dir=str(tmp_path))
+        
+        # Assert
+        internal = logger_b.get_logger()
         assert internal.level == logging.INFO
 
-class TestCriacaoDeArquivos:
 
-    def test_cria_diretorio_de_logs_automaticamente(self, tmp_path):
-        novo_dir = tmp_path / "subdir" / "logs"
-        assert not novo_dir.exists()
-
-        Logger(log_level="INFO", log_dir=str(novo_dir))
-
-        assert novo_dir.exists()
-
-    def test_cria_arquivo_de_log_geral(self, tmp_path):
+@pytest.mark.unit
+class TestLogFileCreation:
+    """Testes de criação de arquivos de log."""
+    
+    def setup_method(self):
+        """Limpa singleton antes de cada teste."""
+        _reset_logger_singleton()
+    
+    def test_should_create_log_directory_automatically(self, tmp_path):
+        """Logger deve criar diretório de logs automaticamente."""
+        # Arrange
+        new_dir = tmp_path / "subdir" / "logs"
+        assert not new_dir.exists()
+        
+        # Act
+        Logger(log_level="INFO", log_dir=str(new_dir))
+        
+        # Assert
+        assert new_dir.exists()
+    
+    def test_should_create_general_log_file(self, tmp_path):
+        """Logger deve criar arquivo sentinela.log."""
+        # Act
         Logger(log_level="INFO", log_dir=str(tmp_path))
+        
+        # Assert
         assert (tmp_path / "sentinela.log").exists()
-
-    def test_cria_arquivo_de_erros(self, tmp_path):
+    
+    def test_should_create_error_log_file(self, tmp_path):
+        """Logger deve criar arquivo errors.log."""
+        # Act
         Logger(log_level="INFO", log_dir=str(tmp_path))
+        
+        # Assert
         assert (tmp_path / "errors.log").exists()
 
-class TestEscritaDeLogs:
 
-    def test_mensagem_info_gravada_no_arquivo_geral(self, tmp_path):
+@pytest.mark.unit
+class TestLogWriting:
+    """Testes de escrita de mensagens no log."""
+    
+    def setup_method(self):
+        """Limpa singleton antes de cada teste."""
+        _reset_logger_singleton()
+    
+    def test_should_write_info_message_to_general_log(self, tmp_path):
+        """Mensagens INFO devem aparecer no sentinela.log."""
+        # Arrange
         log = Logger(log_level="INFO", log_dir=str(tmp_path))
+        
+        # Act
         log.info("Teste de mensagem INFO")
-
-        conteudo = (tmp_path / "sentinela.log").read_text(encoding="utf-8")
-        assert "Teste de mensagem INFO" in conteudo
-
-    def test_mensagem_debug_gravada_quando_nivel_e_debug(self, tmp_path):
+        
+        # Assert
+        content = (tmp_path / "sentinela.log").read_text(encoding="utf-8")
+        assert "Teste de mensagem INFO" in content
+    
+    def test_should_write_debug_when_log_level_is_debug(self, tmp_path):
+        """DEBUG deve ser gravado quando nível é DEBUG."""
+        # Arrange
         log = Logger(log_level="DEBUG", log_dir=str(tmp_path))
+        
+        # Act
         log.debug("Mensagem de debug detalhada")
-
-        conteudo = (tmp_path / "sentinela.log").read_text(encoding="utf-8")
-        assert "Mensagem de debug detalhada" in conteudo
-
-    def test_mensagem_debug_nao_gravada_quando_nivel_e_info(self, tmp_path):
+        
+        # Assert
+        content = (tmp_path / "sentinela.log").read_text(encoding="utf-8")
+        assert "Mensagem de debug detalhada" in content
+    
+    def test_should_not_write_debug_when_log_level_is_info(self, tmp_path):
+        """DEBUG não deve ser gravado quando nível é INFO."""
+        # Arrange
         log = Logger(log_level="INFO", log_dir=str(tmp_path))
+        
+        # Act
         log.debug("Esta mensagem NÃO deve aparecer")
-
-        conteudo = (tmp_path / "sentinela.log").read_text(encoding="utf-8")
-        assert "Esta mensagem NÃO deve aparecer" not in conteudo
-
-    def test_mensagem_warning_aparece_em_ambos_arquivos(self, tmp_path):
+        
+        # Assert
+        content = (tmp_path / "sentinela.log").read_text(encoding="utf-8")
+        assert "Esta mensagem NÃO deve aparecer" not in content
+    
+    def test_should_write_warning_to_both_logs(self, tmp_path):
+        """WARNING deve aparecer em sentinela.log e errors.log."""
+        # Arrange
         log = Logger(log_level="INFO", log_dir=str(tmp_path))
+        
+        # Act
         log.warning("Aviso de atenção")
-
-        geral = (tmp_path / "sentinela.log").read_text(encoding="utf-8")
-        erros = (tmp_path / "errors.log").read_text(encoding="utf-8")
-
-        assert "Aviso de atenção" in geral
-        assert "Aviso de atenção" in erros
-
-    def test_mensagem_error_aparece_em_ambos_arquivos(self, tmp_path):
+        
+        # Assert
+        general = (tmp_path / "sentinela.log").read_text(encoding="utf-8")
+        errors = (tmp_path / "errors.log").read_text(encoding="utf-8")
+        
+        assert "Aviso de atenção" in general
+        assert "Aviso de atenção" in errors
+    
+    def test_should_write_error_to_both_logs(self, tmp_path):
+        """ERROR deve aparecer em sentinela.log e errors.log."""
+        # Arrange
         log = Logger(log_level="INFO", log_dir=str(tmp_path))
+        
+        # Act
         log.error("Erro crítico de teste")
-
-        geral = (tmp_path / "sentinela.log").read_text(encoding="utf-8")
-        erros = (tmp_path / "errors.log").read_text(encoding="utf-8")
-
-        assert "Erro crítico de teste" in geral
-        assert "Erro crítico de teste" in erros
-
-    def test_mensagem_info_nao_aparece_em_errors_log(self, tmp_path):
+        
+        # Assert
+        general = (tmp_path / "sentinela.log").read_text(encoding="utf-8")
+        errors = (tmp_path / "errors.log").read_text(encoding="utf-8")
+        
+        assert "Erro crítico de teste" in general
+        assert "Erro crítico de teste" in errors
+    
+    def test_should_not_write_info_to_error_log(self, tmp_path):
+        """INFO não deve aparecer em errors.log."""
+        # Arrange
         log = Logger(log_level="INFO", log_dir=str(tmp_path))
+        
+        # Act
         log.info("Apenas informação")
+        
+        # Assert
+        errors = (tmp_path / "errors.log").read_text(encoding="utf-8")
+        assert "Apenas informação" not in errors
 
-        erros = (tmp_path / "errors.log").read_text(encoding="utf-8")
-        assert "Apenas informação" not in erros
 
-class TestNiveisDeSeveridade:
-
-    @pytest.mark.parametrize("nivel,metodo,mensagem", [
+@pytest.mark.unit
+class TestLogSeverityLevels:
+    """Testes de níveis de severidade."""
+    
+    def setup_method(self):
+        """Limpa singleton antes de cada teste."""
+        _reset_logger_singleton()
+    
+    @pytest.mark.parametrize("level,method,message", [
         ("DEBUG", "debug",    "msg debug"),
         ("DEBUG", "info",     "msg info"),
         ("DEBUG", "warning",  "msg warning"),
         ("DEBUG", "error",    "msg error"),
         ("DEBUG", "critical", "msg critical"),
     ])
-    def test_todos_niveis_com_log_level_debug(self, tmp_path, nivel, metodo, mensagem):
-        log = Logger(log_level=nivel, log_dir=str(tmp_path))
-        getattr(log, metodo)(mensagem)
-
-        conteudo = (tmp_path / "sentinela.log").read_text(encoding="utf-8")
-        assert mensagem in conteudo
-
-    def test_nivel_aparece_na_mensagem_formatada(self, tmp_path):
+    def test_should_write_all_levels_when_log_level_is_debug(
+        self,
+        tmp_path,
+        level,
+        method,
+        message,
+    ):
+        """Todos os níveis devem ser gravados com DEBUG."""
+        # Arrange
+        log = Logger(log_level=level, log_dir=str(tmp_path))
+        
+        # Act
+        getattr(log, method)(message)
+        
+        # Assert
+        content = (tmp_path / "sentinela.log").read_text(encoding="utf-8")
+        assert message in content
+    
+    def test_should_include_severity_level_in_formatted_message(self, tmp_path):
+        """Nível de severidade deve aparecer na mensagem formatada."""
+        # Arrange
         log = Logger(log_level="INFO", log_dir=str(tmp_path))
+        
+        # Act
         log.error("Falha simulada")
+        
+        # Assert
+        content = (tmp_path / "sentinela.log").read_text(encoding="utf-8")
+        assert "ERROR" in content
 
-        conteudo = (tmp_path / "sentinela.log").read_text(encoding="utf-8")
-        assert "ERROR" in conteudo
 
-class TestFormatacao:
-
-    def test_timestamp_presente_na_mensagem(self, tmp_path):
+@pytest.mark.unit
+class TestLogFormatting:
+    """Testes de formatação de mensagens de log."""
+    
+    def setup_method(self):
+        """Limpa singleton antes de cada teste."""
+        _reset_logger_singleton()
+    
+    def test_should_include_timestamp_in_message(self, tmp_path):
+        """Timestamp deve estar presente na mensagem."""
+        # Arrange
         log = Logger(log_level="INFO", log_dir=str(tmp_path))
+        
+        # Act
         log.info("Testando timestamp")
-
-        conteudo = (tmp_path / "sentinela.log").read_text(encoding="utf-8")
-        assert re.search(r'\d{4}-\d{2}-\d{2}', conteudo), \
-            "Data não encontrada no log — verifique o formato do timestamp"
-
-    def test_formato_padrao_contem_colchetes(self, tmp_path):
+        
+        # Assert
+        content = (tmp_path / "sentinela.log").read_text(encoding="utf-8")
+        assert re.search(r'\d{4}-\d{2}-\d{2}', content), \
+            "Data não encontrada no log"
+    
+    def test_should_use_brackets_in_format(self, tmp_path):
+        """Formato padrão deve conter colchetes."""
+        # Arrange
         log = Logger(log_level="INFO", log_dir=str(tmp_path))
+        
+        # Act
         log.info("Mensagem para checar formato")
-
-        conteudo = (tmp_path / "sentinela.log").read_text(encoding="utf-8")
-        assert "[" in conteudo and "]" in conteudo
-
-    def test_numero_da_linha_presente_no_log(self, tmp_path):
+        
+        # Assert
+        content = (tmp_path / "sentinela.log").read_text(encoding="utf-8")
+        assert "[" in content and "]" in content
+    
+    def test_should_include_line_number_in_log(self, tmp_path):
+        """Número da linha deve estar presente no log."""
+        # Arrange
         log = Logger(log_level="INFO", log_dir=str(tmp_path))
+        
+        # Act
         log.warning("Verificando número de linha")
-
-        conteudo = (tmp_path / "sentinela.log").read_text(encoding="utf-8")
-        assert re.search(r':\d+\]', conteudo), \
+        
+        # Assert
+        content = (tmp_path / "sentinela.log").read_text(encoding="utf-8")
+        assert re.search(r':\d+\]', content), \
             "Número de linha não encontrado no formato do log"
 
-class TestMascaramentoDeSensitivos:
 
-    def test_senha_e_mascarada(self, tmp_path):
+@pytest.mark.unit
+class TestSensitiveDataMasking:
+    """Testes de mascaramento de dados sensíveis."""
+    
+    def setup_method(self):
+        """Limpa singleton antes de cada teste."""
+        _reset_logger_singleton()
+    
+    def test_should_mask_password_field(self, tmp_path):
+        """Campo password deve ser mascarado."""
+        # Arrange
         log = Logger(log_level="INFO", log_dir=str(tmp_path))
+        
+        # Act
         log.info("Tentando autenticar com password=minha_senha_secreta")
-
-        conteudo = (tmp_path / "sentinela.log").read_text(encoding="utf-8")
-        assert "minha_senha_secreta" not in conteudo
-        assert "***MASKED***" in conteudo
-
-    def test_token_e_mascarado(self, tmp_path):
+        
+        # Assert
+        content = (tmp_path / "sentinela.log").read_text(encoding="utf-8")
+        assert "minha_senha_secreta" not in content
+        assert "***MASKED***" in content
+    
+    def test_should_mask_token_field(self, tmp_path):
+        """Campo token deve ser mascarado."""
+        # Arrange
         log = Logger(log_level="DEBUG", log_dir=str(tmp_path))
+        
+        # Act
         log.debug("Autorizando com token=eyJhbGciOiJIUzI1NiJ9.abc123")
-
-        conteudo = (tmp_path / "sentinela.log").read_text(encoding="utf-8")
-        assert "eyJhbGciOiJIUzI1NiJ9.abc123" not in conteudo
-        assert "***MASKED***" in conteudo
-
-    def test_numero_cartao_e_mascarado(self, tmp_path):
+        
+        # Assert
+        content = (tmp_path / "sentinela.log").read_text(encoding="utf-8")
+        assert "eyJhbGciOiJIUzI1NiJ9.abc123" not in content
+        assert "***MASKED***" in content
+    
+    def test_should_mask_card_number(self, tmp_path):
+        """Números de cartão devem ser mascarados."""
+        # Arrange
         log = Logger(log_level="INFO", log_dir=str(tmp_path))
+        
+        # Act
         log.info("Processando cartão 4111111111111111")
-
-        conteudo = (tmp_path / "sentinela.log").read_text(encoding="utf-8")
-        assert "4111111111111111" not in conteudo
-        assert "***CARD***" in conteudo
-
-    def test_texto_normal_nao_e_mascarado(self, tmp_path):
+        
+        # Assert
+        content = (tmp_path / "sentinela.log").read_text(encoding="utf-8")
+        assert "4111111111111111" not in content
+        assert "***CARD***" in content
+    
+    def test_should_not_mask_normal_text(self, tmp_path):
+        """Texto normal não deve ser mascarado."""
+        # Arrange
         log = Logger(log_level="INFO", log_dir=str(tmp_path))
+        
+        # Act
         log.info("Usuário joao.silva@email.com fez login")
+        
+        # Assert
+        content = (tmp_path / "sentinela.log").read_text(encoding="utf-8")
+        assert "joao.silva@email.com fez login" in content
 
-        conteudo = (tmp_path / "sentinela.log").read_text(encoding="utf-8")
-        assert "joao.silva@email.com fez login" in conteudo
 
-class TestLogRequest:
-
-    def test_requisicao_bem_sucedida_gera_info(self, tmp_path):
+@pytest.mark.unit
+class TestHttpRequestLogging:
+    """Testes de logging de requisições HTTP."""
+    
+    def setup_method(self):
+        """Limpa singleton antes de cada teste."""
+        _reset_logger_singleton()
+    
+    def test_should_log_successful_request(self, tmp_path):
+        """Requisição bem-sucedida deve gerar log INFO."""
+        # Arrange
         log = Logger(log_level="INFO", log_dir=str(tmp_path))
+        
+        # Act
         log.log_request("GET", "https://api.exemplo.com/users", 200, 0.342)
+        
+        # Assert
+        content = (tmp_path / "sentinela.log").read_text(encoding="utf-8")
+        assert "HTTP GET" in content
+        assert "200" in content
 
-        conteudo = (tmp_path / "sentinela.log").read_text(encoding="utf-8")
-        assert "HTTP GET" in conteudo
-        assert "200" in conteudo
 
         erros = (tmp_path / "errors.log").read_text(encoding="utf-8")
         assert "HTTP GET" not in erros

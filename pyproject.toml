@@ -1,3 +1,73 @@
+[build-system]
+requires = ["setuptools>=61.0", "wheel"]
+build-backend = "setuptools.build_meta"
+
+[project]
+name = "test_framework_qa3"
+version = "1.0.0"
+description = "Framework de automação de testes baseado em Python - Sentenela"
+requires-python = ">=3.8"
+dependencies = [
+    "requests>=2.31.0",
+    "python-dotenv>=1.0.0",
+]
+
+[project.optional-dependencies]
+dev = [
+    "pytest>=7.4.0",
+    "pytest-cov>=4.1.0",
+    "responses>=0.23.0",
+    "pytest-mock>=3.11.0",
+    "faker>=19.0.0",
+    "pylint>=2.17.0",
+]
+
 [tool.pytest.ini_options]
 pythonpath = ["."]
 testpaths = ["tests"]
+python_files = ["test_*.py", "*_test.py"]
+python_classes = "Test*"
+python_functions = "test_*"
+
+# Configuração de markers para categorização de testes
+markers = [
+    "unit: testes unitários",
+    "integration: testes de integração",
+    "e2e: testes ponta-a-ponta",
+    "slow: testes que levam mais tempo para executar",
+    "flaky: testes com comportamento instável",
+]
+
+# Cobertura de testes
+addopts = """
+    --strict-markers
+    --disable-warnings
+    --tb=short
+"""
+
+# Configuração de cobertura
+[tool.coverage.run]
+source = ["src"]
+omit = [
+    "*/tests/*",
+    "*/venv/*",
+    "*/__pycache__/*",
+]
+
+[tool.coverage.report]
+exclude_lines = [
+    "pragma: no cover",
+    "def __repr__",
+    "raise AssertionError",
+    "raise NotImplementedError",
+    "if __name__ == .__main__.:",
+]
+precision = 2
+show_missing = true
+
+[tool.pylint.messages_control]
+disable = [
+    "C0330", "C0326",  # Formatação
+    "R0913",           # Muitos argumentos
+    "W0212",           # Acesso a membro privado
+]
