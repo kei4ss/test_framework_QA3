@@ -6,3 +6,4 @@ pytest-mock>=3.11.0
 python-dotenv>=1.0.0
 pylint>=2.17.0
 faker>=19.0.0
+reportlab
