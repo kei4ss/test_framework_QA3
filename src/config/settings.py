@@ -37,6 +37,18 @@ def load_environment_variables(env_dir, env_name):
     load_dotenv(dotenv_path=env_path)
 
 
+def get_int_env(name, default):
+    """Retorna uma variável de ambiente inteira com fallback seguro."""
+    raw_value = (os.getenv(name) or "").strip()
+    if not raw_value or raw_value.startswith('#'):
+        return default
+
+    try:
+        return int(raw_value)
+    except ValueError:
+        return default
+
+
 raw_mode = (os.getenv('MODE') or '').strip().upper()
 mode = 'DEV' if not raw_mode or raw_mode.startswith('#') else raw_mode
 
@@ -84,7 +96,7 @@ class Settings:
         self.__api_base_url = os.getenv('API_BASE_URL', 'http://localhost:8000/api')
         self.__api_endpoints = os.getenv('API_ENDPOINTS', '').split(',')
 
-        self.__timeout = int(os.getenv('TIMEOUT', '30'))
+        self.__timeout = get_int_env('TIMEOUT', 30)
 
         self.__initialized = True
 

@@ -7,13 +7,30 @@ Nota: Estes testes usam a API real em https://jsonplaceholder.typicode.com
 Para ambiente offline, considere usar mocks HTTP (responses library).
 """
 
+from pathlib import Path
+
 import pytest
 from requests import RequestException
 
 from src.config.data_provider_config import DataSourceType
-from src.infrastructure.logger.logger import Logger
 from src.infrastructure.requestManager.request_manager import RequestManager
+from src.infrastructure.schemaValidation import SchemaLoader, SchemaValidator
 from src.utils.data_provider import DataProvider
+
+
+SCHEMAS_DIR = (
+    Path(__file__).resolve().parents[3]
+    / "shared"
+    / "fixtures"
+    / "schemas"
+    / "jsonplaceholder"
+)
+
+USERS_LIST_SCHEMA = SchemaLoader.load(SCHEMAS_DIR / "users_list_schema.json")
+USER_SCHEMA = SchemaLoader.load(SCHEMAS_DIR / "user_schema.json")
+CREATE_USER_RESPONSE_SCHEMA = SchemaLoader.load(
+    SCHEMAS_DIR / "create_user_response_schema.json"
+)
 
 
 @pytest.fixture
@@ -56,6 +73,7 @@ class TestGetUsersEndpoint:
         assert response.status_code == 200
         assert isinstance(body, list)
         assert len(body) > 0
+        SchemaValidator.validate_many(body, USERS_LIST_SCHEMA)
         assert {"id", "name", "username", "email"}.issubset(body[0].keys())
     
     @pytest.mark.parametrize("user_id", [1, 2, 3, 4, 5])
@@ -71,6 +89,7 @@ class TestGetUsersEndpoint:
         
         # Assert
         assert response.status_code == 200
+        SchemaValidator.validate(body, USER_SCHEMA)
         assert body["id"] == user_id
         assert {"id", "name", "username", "email"}.issubset(body.keys())
     
@@ -104,6 +123,7 @@ class TestPostUsersEndpoint:
         
         # Assert
         assert response.status_code == 201
+        SchemaValidator.validate(body, CREATE_USER_RESPONSE_SCHEMA)
         assert body["name"] == payload["name"]
         assert body["email"] == payload["email"]
 
