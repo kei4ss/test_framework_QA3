@@ -69,6 +69,58 @@ framework-automacao/
 ```
 
 
+## Ambiente Python (venv)
+
+Instruções para criar um ambiente virtual Python usando `venv` (Linux) e instalar dependências:
+
+```bash
+# criar o ambiente
+python3 -m venv .venv
+# ativar
+source .venv/bin/activate
+# instalar dependências do projeto
+pip install -r requirements.txt
+# congelar versões (opcional)
+pip freeze > requirements.txt
+# desativar
+deactivate
+# remover o ambiente (quando não precisar mais)
+rm -rf .venv
+```
+
+### Windows (PowerShell)
+
+```powershell
+# criar o ambiente
+python -m venv .venv
+# ativar (PowerShell)
+.\.venv\Scripts\Activate.ps1
+# instalar dependências
+pip install -r requirements.txt
+# congelar versões (opcional)
+pip freeze > requirements.txt
+# desativar
+deactivate
+# remover o ambiente
+Remove-Item -Recurse -Force .venv
+```
+
+### Windows (cmd)
+
+```cmd
+:: criar o ambiente
+python -m venv .venv
+:: ativar (cmd)
+.venv\Scripts\activate.bat
+:: instalar dependências
+pip install -r requirements.txt
+:: desativar
+deactivate
+:: remover o ambiente
+rmdir /s /q .venv
+```
+
+
 # Membros
 - Ilmara Guimarães Soares
 - Lara Matos Aguirres
