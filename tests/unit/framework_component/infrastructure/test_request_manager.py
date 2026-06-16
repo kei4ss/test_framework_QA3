@@ -77,6 +77,8 @@ def build_response(
 # Singleton
 # =====================================================
 
+@pytest.mark.framework_component
+@pytest.mark.unit
 class TestRequestManagerSingleton:
 
     def test_should_return_same_instance(self):
@@ -99,6 +101,8 @@ class TestRequestManagerSingleton:
 # URL
 # =====================================================
 
+@pytest.mark.framework_component
+@pytest.mark.unit
 class TestRequestManagerUrl:
 
     def test_should_build_url_correctly(
@@ -126,6 +130,8 @@ class TestRequestManagerUrl:
 # GET
 # =====================================================
 
+@pytest.mark.framework_component
+@pytest.mark.unit
 class TestRequestManagerGet:
 
     @patch("requests.Session.request")
@@ -164,6 +170,8 @@ class TestRequestManagerGet:
 # HTTP METHODS
 # =====================================================
 
+@pytest.mark.framework_component
+@pytest.mark.unit
 class TestRequestManagerHttpMethods:
 
     @pytest.mark.parametrize(
@@ -209,6 +217,8 @@ class TestRequestManagerHttpMethods:
 # Headers
 # =====================================================
 
+@pytest.mark.framework_component
+@pytest.mark.unit
 class TestRequestManagerHeaders:
 
     @patch("requests.Session.request")
@@ -268,6 +278,8 @@ class TestRequestManagerHeaders:
 # Authentication
 # =====================================================
 
+@pytest.mark.framework_component
+@pytest.mark.unit
 class TestRequestManagerAuthentication:
 
     @patch("requests.Session.request")
@@ -300,6 +312,8 @@ class TestRequestManagerAuthentication:
 # JSON
 # =====================================================
 
+@pytest.mark.framework_component
+@pytest.mark.unit
 class TestRequestManagerJson:
 
     @patch("requests.Session.request")
@@ -379,6 +393,8 @@ class TestRequestManagerJson:
 # Error Handling
 # =====================================================
 
+@pytest.mark.framework_component
+@pytest.mark.unit
 class TestRequestManagerErrors:
 
     @patch("requests.Session.request")
@@ -428,6 +444,8 @@ class TestRequestManagerErrors:
 # Logging
 # =====================================================
 
+@pytest.mark.framework_component
+@pytest.mark.unit
 class TestRequestManagerLogging:
 
     @patch("requests.Session.request")

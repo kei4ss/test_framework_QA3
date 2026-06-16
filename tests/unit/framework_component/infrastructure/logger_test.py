@@ -28,6 +28,7 @@ def _reset_logger_singleton():
         test_logger.removeHandler(handler)
 
 
+@pytest.mark.framework_component
 @pytest.mark.unit
 class TestLoggerSingleton:
     """Testes do padrão Singleton do Logger."""
@@ -58,6 +59,7 @@ class TestLoggerSingleton:
         assert internal.level == logging.INFO
 
 
+@pytest.mark.framework_component
 @pytest.mark.unit
 class TestLogFileCreation:
     """Testes de criação de arquivos de log."""
@@ -95,6 +97,7 @@ class TestLogFileCreation:
         assert (tmp_path / "errors.log").exists()
 
 
+@pytest.mark.framework_component
 @pytest.mark.unit
 class TestLogWriting:
     """Testes de escrita de mensagens no log."""
@@ -182,6 +185,7 @@ class TestLogWriting:
         assert "Apenas informação" not in errors
 
 
+@pytest.mark.framework_component
 @pytest.mark.unit
 class TestLogSeverityLevels:
     """Testes de níveis de severidade."""
@@ -228,6 +232,7 @@ class TestLogSeverityLevels:
         assert "ERROR" in content
 
 
+@pytest.mark.framework_component
 @pytest.mark.unit
 class TestLogFormatting:
     """Testes de formatação de mensagens de log."""
@@ -275,6 +280,7 @@ class TestLogFormatting:
             "Número de linha não encontrado no formato do log"
 
 
+@pytest.mark.framework_component
 @pytest.mark.unit
 class TestSensitiveDataMasking:
     """Testes de mascaramento de dados sensíveis."""
@@ -335,6 +341,7 @@ class TestSensitiveDataMasking:
         assert "joao.silva@email.com fez login" in content
 
 
+@pytest.mark.framework_component
 @pytest.mark.unit
 class TestHttpRequestLogging:
     """Testes de logging de requisições HTTP."""
@@ -377,8 +384,10 @@ class TestHttpRequestLogging:
         assert "204" in conteudo
         assert "0.089s" in conteudo
 
-class TestRotacaoDeArquivos:
 
+@pytest.mark.framework_component
+@pytest.mark.unit
+class TestRotacaoDeArquivos:
     def test_rotacao_cria_arquivo_backup(self, tmp_path):
         log = Logger(log_level="INFO", log_dir=str(tmp_path))
 
