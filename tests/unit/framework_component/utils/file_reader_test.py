@@ -4,7 +4,9 @@ from unittest.mock import mock_open, patch
 
 from src.utils.file_reader import FileReader
 
-
+@pytest.mark.unit
+@pytest.mark.framework_component
+@pytest.mark.file_reader
 def test_read_json_success_with_dict():
     fake_data = {"name": "Vitor", "age": 25}
 
@@ -14,7 +16,9 @@ def test_read_json_success_with_dict():
 
     assert result == fake_data
 
-
+@pytest.mark.unit
+@pytest.mark.framework_component
+@pytest.mark.file_reader
 def test_read_json_success_with_list():
     fake_data = [{"name": "Vitor"}, {"name": "João"}]
 
@@ -24,7 +28,9 @@ def test_read_json_success_with_list():
 
     assert result == fake_data
 
-
+@pytest.mark.unit
+@pytest.mark.framework_component
+@pytest.mark.file_reader
 def test_read_json_file_not_found():
     with patch("os.path.exists", return_value=False):
         with pytest.raises(FileNotFoundError) as error:
@@ -33,6 +39,9 @@ def test_read_json_file_not_found():
     assert "Arquivo JSON não encontrado" in str(error.value)
 
 
+@pytest.mark.unit
+@pytest.mark.framework_component
+@pytest.mark.file_reader
 def test_read_json_invalid_json():
     invalid_json = "{invalid_json"
 
@@ -44,6 +53,9 @@ def test_read_json_invalid_json():
     assert "Erro ao decodificar JSON" in str(error.value)
 
 
+@pytest.mark.unit
+@pytest.mark.framework_component
+@pytest.mark.file_reader
 def test_read_csv_success():
     csv_content = (
         "name,age,active,height\n"
@@ -71,6 +83,9 @@ def test_read_csv_success():
     ]
 
 
+@pytest.mark.unit
+@pytest.mark.framework_component
+@pytest.mark.file_reader
 def test_read_csv_file_not_found():
     with patch("os.path.exists", return_value=False):
         with pytest.raises(FileNotFoundError) as error:
@@ -78,7 +93,9 @@ def test_read_csv_file_not_found():
 
     assert "Arquivo CSV não encontrado" in str(error.value)
 
-
+@pytest.mark.unit
+@pytest.mark.framework_component
+@pytest.mark.file_reader
 def test_read_csv_empty_values_are_converted_to_none():
     csv_content = "name,age\nVitor,\n"
 
@@ -88,7 +105,9 @@ def test_read_csv_empty_values_are_converted_to_none():
 
     assert result == [{"name": "Vitor", "age": None}]
 
-
+@pytest.mark.unit
+@pytest.mark.framework_component
+@pytest.mark.file_reader
 @pytest.mark.parametrize(
     "value, expected",
     [
@@ -106,7 +125,9 @@ def test_read_csv_empty_values_are_converted_to_none():
 def test_convert_value(value, expected):
     assert FileReader._convert_value(value) == expected
 
-
+@pytest.mark.unit
+@pytest.mark.framework_component
+@pytest.mark.file_reader
 def test_list_files_in_directory_without_extension():
     fake_files = ["data.json", "users.csv", "readme.md"]
 
@@ -120,7 +141,9 @@ def test_list_files_in_directory_without_extension():
 
     assert result == fake_files
 
-
+@pytest.mark.unit
+@pytest.mark.framework_component
+@pytest.mark.file_reader
 def test_list_files_in_directory_with_extension():
     fake_files = ["data.json", "users.csv", "config.json"]
 
@@ -131,7 +154,9 @@ def test_list_files_in_directory_with_extension():
 
     assert result == ["data.json", "config.json"]
 
-
+@pytest.mark.unit
+@pytest.mark.framework_component
+@pytest.mark.file_reader
 def test_list_files_in_directory_ignores_directories():
     fake_files = ["data.json", "folder", "users.csv"]
 
@@ -145,7 +170,9 @@ def test_list_files_in_directory_ignores_directories():
 
     assert result == ["data.json", "users.csv"]
 
-
+@pytest.mark.unit
+@pytest.mark.framework_component
+@pytest.mark.file_reader
 def test_list_files_in_directory_not_found():
     with patch("os.path.exists", return_value=False):
         with pytest.raises(FileNotFoundError) as error:

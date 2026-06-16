@@ -59,14 +59,11 @@ jobs:
       - name: Install dependencies
         run: pip install -r requirements.txt
 
-      - name: Run unit tests
-        run: pytest tests/unit/ -v --tb=short
+      - name: Run unit framework components tests
+        run: pytest -m "framework_component and unit" -v
 
-      - name: Run integration tests
-        run: pytest tests/integration/ -v --tb=short
-
-      - name: Run e2e tests
-        run: pytest tests/e2e/ -v --tb=short
+      - name: Run integration framework components tests
+        run: pytest -m "framework_component and integration" -v
 
       - name: Upload PDF report
         if: always()

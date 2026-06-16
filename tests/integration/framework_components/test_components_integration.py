@@ -29,6 +29,7 @@ def _build_payload_from_provider():
 
 
 @pytest.mark.integration
+@pytest.mark.framework_component
 class TestRequestManagerAndLoggerIntegration:
     """Testes de integração entre RequestManager e Logger."""
     
@@ -53,6 +54,7 @@ class TestRequestManagerAndLoggerIntegration:
 
 
 @pytest.mark.integration
+@pytest.mark.framework_component
 class TestRequestManagerAndDataProviderIntegration:
     """Testes de integração entre RequestManager e DataProvider."""
     
@@ -76,6 +78,7 @@ class TestRequestManagerAndDataProviderIntegration:
 
 
 @pytest.mark.integration
+@pytest.mark.framework_component
 class TestFullComponentIntegration:
     """Testes de integração completa entre todos os componentes."""
     

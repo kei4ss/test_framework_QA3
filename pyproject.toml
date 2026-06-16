@@ -36,6 +36,9 @@ markers = [
     "e2e: testes ponta-a-ponta",
     "slow: testes que levam mais tempo para executar",
     "flaky: testes com comportamento instável",
+    "framework_component: Testes dos componentes do framework",
+    "file_reader: Testes do componente file_reader",
+    "data_provider: Testes do componente data_provider"
 ]
 
 # Cobertura de testes
