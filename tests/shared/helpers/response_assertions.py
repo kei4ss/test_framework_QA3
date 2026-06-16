@@ -1,13 +1,17 @@
+from src.infrastructure.schemaValidation import SchemaValidator
+
 USER_REQUIRED_KEYS = {"id", "email", "username", "password", "name", "address", "phone"}
 
 
-def assert_successful_list_response(response, expected_keys=None, min_length=1):
+def assert_successful_list_response(response, expected_keys=None, min_length=1, schema=None):
     assert response.status_code == 200
     body = response.json()
     assert isinstance(body, list)
     assert len(body) >= min_length
     if expected_keys and body:
         assert expected_keys.issubset(body[0].keys())
+    if schema is not None:
+        SchemaValidator.validate_many(body, schema)
     return body
 
 
@@ -42,30 +46,35 @@ def assert_user_geolocation(user):
     assert "long" in geo
 
 
-def create_user(client, payload):
+def assert_schema(response, schema):
+    body = response.json()
+    SchemaValidator.validate(body, schema)
+    return body
+
+
+def assert_successful_action_response(response, expected_status=200, schema=None):
+    assert response.status_code == expected_status
+    body = response.json()
+    if schema is not None:
+        SchemaValidator.validate(body, schema)
+    return body
+
+
+def create_user(client, payload, schema=None):
     response = client.post("/users", json=payload)
-    assert response.status_code == 200
-    return response.json()
+    return assert_successful_action_response(response, expected_status=201, schema=schema)
 
 
-def assert_successful_action_response(response):
-    assert response.status_code == 200
-    return response.json()
+def update_user(client, user_id, payload, schema=None):
+    response = client.put(f"/users/{user_id}", json=payload)
+    return assert_successful_action_response(response, schema=schema)
 
 
-def update_user(client, user_id, payload):
-    return assert_successful_action_response(
-        client.put(f"/users/{user_id}", json=payload)
-    )
+def patch_user(client, user_id, payload, schema=None):
+    response = client.patch(f"/users/{user_id}", json=payload)
+    return assert_successful_action_response(response, schema=schema)
 
 
-def patch_user(client, user_id, payload):
-    return assert_successful_action_response(
-        client.patch(f"/users/{user_id}", json=payload)
-    )
-
-
-def delete_user(client, user_id):
-    return assert_successful_action_response(
-        client.delete(f"/users/{user_id}")
-    )
+def delete_user(client, user_id, schema=None):
+    response = client.delete(f"/users/{user_id}")
+    return assert_successful_action_response(response, schema=schema)

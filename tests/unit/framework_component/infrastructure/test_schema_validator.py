@@ -38,9 +38,13 @@ def create_user_response_schema():
 def test_should_validate_single_object_against_schema(user_schema):
     payload = {
         "id": 1,
-        "name": "Leanne Graham",
+        "name": {
+            "firstname": "test",
+            "lastname": "user"
+        },
         "username": "Bret",
         "email": "leanne@example.com",
+        "password": "senhaSegura123"
     }
 
     assert SchemaValidator.validate(payload, user_schema) is True

@@ -2,13 +2,21 @@
   "$schema": "https://json-schema.org/draft/2020-12/schema",
   "title": "JSONPlaceholder User",
   "type": "object",
-  "required": ["id", "name", "username", "email"],
+  "required": ["id", "username", "name", "email", "password"],
   "properties": {
     "id": {
       "type": "integer"
     },
     "name": {
-      "type": "string"
+      "type": "object",
+      "properties": {
+        "firstname": {
+          "type":"string"
+        },
+        "lastname": {
+          "type":"string"
+        }
+      }
     },
     "username": {
       "type": "string"
@@ -16,6 +24,9 @@
     "email": {
       "type": "string",
       "format": "email"
+    },
+    "password":{
+      "type":"string"
     }
   },
   "additionalProperties": true

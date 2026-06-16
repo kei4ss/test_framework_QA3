@@ -55,6 +55,7 @@ NEW_USER_PAYLOAD = UserFactory.build(
 # ---------------------------------------------------------------------------
 
 @pytest.mark.integration
+@pytest.mark.user
 class TestGetAllUsers:
     """Testes do endpoint GET /users."""
 
@@ -104,6 +105,7 @@ class TestGetAllUsers:
 # ---------------------------------------------------------------------------
 
 @pytest.mark.integration
+@pytest.mark.user
 class TestGetUsersWithLimit:
     """Testes do endpoint GET /users?limit={n}."""
 
@@ -122,6 +124,7 @@ class TestGetUsersWithLimit:
 # ---------------------------------------------------------------------------
 
 @pytest.mark.integration
+@pytest.mark.user
 class TestGetUsersSorted:
     """Testes do endpoint GET /users?sort={asc|desc}."""
 
@@ -149,6 +152,7 @@ class TestGetUsersSorted:
 # ---------------------------------------------------------------------------
 
 @pytest.mark.integration
+@pytest.mark.user
 class TestGetSingleUser:
     """Testes do endpoint GET /users/{id}."""
 
@@ -181,13 +185,13 @@ class TestGetSingleUser:
 # ---------------------------------------------------------------------------
 
 @pytest.mark.integration
+@pytest.mark.user
 class TestPostUser:
     """Testes do endpoint POST /users."""
 
     def test_deve_retornar_status_200_ao_criar_usuario(self, client):
         """POST /users com payload válido deve retornar 200 e o usuário criado."""
         body = create_user(client, NEW_USER_PAYLOAD)
-
         assert body["email"] == NEW_USER_PAYLOAD["email"]
         assert body["username"] == NEW_USER_PAYLOAD["username"]
 
@@ -211,6 +215,7 @@ class TestPostUser:
 # ---------------------------------------------------------------------------
 
 @pytest.mark.integration
+@pytest.mark.user
 class TestPutUser:
     """Testes do endpoint PUT /users/{id}."""
 
@@ -234,6 +239,7 @@ class TestPutUser:
 # ---------------------------------------------------------------------------
 
 @pytest.mark.integration
+@pytest.mark.user
 class TestPatchUser:
     """Testes do endpoint PATCH /users/{id}."""
 
@@ -257,6 +263,7 @@ class TestPatchUser:
 # ---------------------------------------------------------------------------
 
 @pytest.mark.integration
+@pytest.mark.user
 class TestDeleteUser:
     """Testes do endpoint DELETE /users/{id}."""
 

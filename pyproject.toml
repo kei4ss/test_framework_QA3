@@ -34,11 +34,13 @@ markers = [
     "unit: testes unitários",
     "integration: testes de integração",
     "e2e: testes ponta-a-ponta",
+    "smoke: testes que verificam rapidamente as funcionalidades mais importantes",
     "slow: testes que levam mais tempo para executar",
     "flaky: testes com comportamento instável",
     "framework_component: Testes dos componentes do framework",
     "file_reader: Testes do componente file_reader",
-    "data_provider: Testes do componente data_provider"
+    "data_provider: Testes do componente data_provider",
+    "user: Testes relacionados ao recurso usuário"
 ]
 
 # Cobertura de testes

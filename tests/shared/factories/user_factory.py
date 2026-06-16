@@ -1,5 +1,23 @@
+from pathlib import Path
+
+from src.infrastructure.schemaValidation import SchemaLoader
+
+SCHEMAS_DIR = (
+    Path(__file__).resolve().parents[1]
+    / "fixtures"
+    / "schemas"
+    / "jsonplaceholder"
+)
+
+
 class UserFactory:
     """Factory centralizada para payloads de usuários."""
+
+    USER_SCHEMA = SchemaLoader.load(SCHEMAS_DIR / "user_schema.json")
+    USERS_LIST_SCHEMA = SchemaLoader.load(SCHEMAS_DIR / "users_list_schema.json")
+    CREATE_USER_RESPONSE_SCHEMA = SchemaLoader.load(
+        SCHEMAS_DIR / "create_user_response_schema.json"
+    )
 
     @staticmethod
     def build(**overrides):
@@ -19,3 +37,5 @@ class UserFactory:
         }
         payload.update(overrides)
         return payload
+    
+
