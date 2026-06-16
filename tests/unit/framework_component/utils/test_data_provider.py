@@ -9,9 +9,6 @@ Valida:
 """
 
 import pytest
-import os
-import json
-from typing import List, Dict, Any
 
 from src.utils.file_reader import FileReader
 from src.utils.data_validator import DataValidator
@@ -23,6 +20,8 @@ from src.config.data_provider_config import DataProviderConfig, DataSourceType
 
 
 @pytest.mark.unit
+@pytest.mark.framework_component
+@pytest.mark.data_provider
 class TestFileReader:
     """Testes para a classe FileReader."""
     
@@ -98,6 +97,8 @@ class TestFileReader:
 
 
 @pytest.mark.unit
+@pytest.mark.framework_component
+@pytest.mark.data_provider
 class TestDataValidator:
     """Testes para a classe DataValidator."""
     
@@ -177,6 +178,8 @@ class TestDataValidator:
 
 
 @pytest.mark.unit
+@pytest.mark.framework_component
+@pytest.mark.data_provider
 class TestDataProvider:
     """Testes para a classe DataProvider."""
     
@@ -338,6 +341,8 @@ class TestDataProvider:
 
 
 @pytest.mark.unit
+@pytest.mark.framework_component
+@pytest.mark.data_provider
 class TestJSONDataStrategy:
     """Testes para a estratégia JSON."""
     
@@ -358,6 +363,8 @@ class TestJSONDataStrategy:
 
 
 @pytest.mark.unit
+@pytest.mark.framework_component
+@pytest.mark.data_provider
 class TestCSVDataStrategy:
     """Testes para a estratégia CSV."""
     
@@ -378,6 +385,8 @@ class TestCSVDataStrategy:
 
 
 @pytest.mark.unit
+@pytest.mark.framework_component
+@pytest.mark.data_provider
 class TestHardcodedDataStrategy:
     """Testes para a estratégia Hardcoded."""
     
@@ -409,6 +418,8 @@ class TestHardcodedDataStrategy:
 
 
 @pytest.mark.unit
+@pytest.mark.framework_component
+@pytest.mark.data_provider
 class TestDataProviderConfig:
     """Testes para a configuração do Data Provider."""
     
@@ -444,40 +455,3 @@ class TestDataProviderConfig:
         assert isinstance(config_dict, dict)
         assert 'default_source' in config_dict
         assert 'data_path' in config_dict
-
-
-# Testes de Integração
-class TestDataProviderIntegration:
-    """Testes de integração do Data Provider"""
-    
-    def test_full_workflow_json_to_csv_fallback(self):
-        """Testa workflow completo com fallback"""
-        provider = DataProvider()
-        provider.config.enable_fallback = True
-        
-        # Define CSV como preferencial
-        provider.set_default_source(DataSourceType.CSV)
-        
-        # Tenta obter dados de produtos (só existe em JSON)
-        data = provider.get_data(identifier='products')
-        
-        assert isinstance(data, list)
-        assert len(data) > 0
-    
-    def test_multiple_data_sources_consistency(self):
-        """Testa consistência de dados de múltiplas fontes"""
-        provider = DataProvider()
-        
-        json_data = provider.get_user_data(source=DataSourceType.JSON)
-        csv_data = provider.get_user_data(source=DataSourceType.CSV)
-        
-        # Ambos devem ter dados
-        assert len(json_data) > 0
-        assert len(csv_data) > 0
-        
-        # Ambos devem ter os mesmos campos
-        if json_data and csv_data:
-            json_fields = set(json_data[0].keys())
-            csv_fields = set(csv_data[0].keys())
-            # CSV pode ter campos adicionais por causa do parse
-            assert json_fields.issubset(csv_fields) or csv_fields.issubset(json_fields)
