@@ -1,0 +1,71 @@
+USER_REQUIRED_KEYS = {"id", "email", "username", "password", "name", "address", "phone"}
+
+
+def assert_successful_list_response(response, expected_keys=None, min_length=1):
+    assert response.status_code == 200
+    body = response.json()
+    assert isinstance(body, list)
+    assert len(body) >= min_length
+    if expected_keys and body:
+        assert expected_keys.issubset(body[0].keys())
+    return body
+
+
+def assert_user_has_required_fields(user, expected_keys=USER_REQUIRED_KEYS):
+    assert expected_keys.issubset(user.keys()), (
+        f"Usuário id={user.get('id')} não contém todos os campos obrigatórios."
+    )
+
+
+def assert_user_name_structure(user):
+    assert "firstname" in user["name"]
+    assert "lastname" in user["name"]
+
+
+def assert_user_address_structure(user):
+    address = user["address"]
+    for field in ("city", "street", "number", "zipcode"):
+        assert field in address, (
+            f"Usuário id={user['id']} sem campo '{field}' no endereço."
+        )
+
+
+def assert_user_email_valid(user):
+    assert "@" in user["email"], (
+        f"Usuário id={user['id']} tem email inválido: {user['email']}"
+    )
+
+
+def assert_user_geolocation(user):
+    geo = user["address"]["geolocation"]
+    assert "lat" in geo
+    assert "long" in geo
+
+
+def create_user(client, payload):
+    response = client.post("/users", json=payload)
+    assert response.status_code == 200
+    return response.json()
+
+
+def assert_successful_action_response(response):
+    assert response.status_code == 200
+    return response.json()
+
+
+def update_user(client, user_id, payload):
+    return assert_successful_action_response(
+        client.put(f"/users/{user_id}", json=payload)
+    )
+
+
+def patch_user(client, user_id, payload):
+    return assert_successful_action_response(
+        client.patch(f"/users/{user_id}", json=payload)
+    )
+
+
+def delete_user(client, user_id):
+    return assert_successful_action_response(
+        client.delete(f"/users/{user_id}")
+    )

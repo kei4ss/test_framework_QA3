@@ -13,21 +13,30 @@ Cobre todos os endpoints disponíveis:
 
 import pytest
 
-from src.infrastructure.requestManager.request_manager import RequestManager
+from tests.shared.factories.user_factory import UserFactory
+from tests.shared.helpers.response_assertions import (
+    USER_REQUIRED_KEYS,
+    assert_successful_list_response,
+    assert_user_address_structure,
+    assert_user_email_valid,
+    assert_user_geolocation,
+    assert_user_has_required_fields,
+    assert_user_name_structure,
+    create_user,
+    delete_user,
+    patch_user,
+    update_user,
+)
 
-BASE_URL = "https://fakestoreapi.com"
-
-USER_KEYS = {"id", "email", "username", "password", "name", "address", "phone"}
-
-NEW_USER_PAYLOAD = {
-    "email": "qa_test@example.com",
-    "username": "qa_tester_framework",
-    "password": "senha_segura_123",
-    "name": {
+NEW_USER_PAYLOAD = UserFactory.build(
+    email="qa_test@example.com",
+    username="qa_tester_framework",
+    password="senha_segura_123",
+    name={
         "firstname": "QA",
         "lastname": "Tester",
     },
-    "address": {
+    address={
         "city": "Brasília",
         "street": "QS 1 Conjunto 10",
         "number": 42,
@@ -37,14 +46,8 @@ NEW_USER_PAYLOAD = {
             "long": "-47.9292",
         },
     },
-    "phone": "61-99999-0000",
-}
-
-
-@pytest.fixture
-def client():
-    """RequestManager configurado para a FakeStore API."""
-    return RequestManager(base_url=BASE_URL, timeout=15)
+    phone="61-99999-0000",
+)
 
 
 # ---------------------------------------------------------------------------
@@ -57,59 +60,42 @@ class TestGetAllUsers:
 
     def test_deve_retornar_status_200_e_lista_de_usuarios(self, client):
         """GET /users deve retornar 200 e uma lista não-vazia de usuários."""
-        response = client.get("/users")
-        body = response.json()
-
-        assert response.status_code == 200
-        assert isinstance(body, list)
+        body = assert_successful_list_response(
+            client.get("/users"), expected_keys=USER_REQUIRED_KEYS, min_length=1
+        )
         assert len(body) > 0
 
     def test_cada_usuario_deve_conter_campos_obrigatorios(self, client):
         """Cada usuário na listagem deve conter os campos obrigatórios."""
-        response = client.get("/users")
-        body = response.json()
+        body = assert_successful_list_response(client.get("/users"))
 
         for user in body:
-            assert USER_KEYS.issubset(user.keys()), (
-                f"Usuário id={user.get('id')} não contém todos os campos obrigatórios."
-            )
+            assert_user_has_required_fields(user)
 
     def test_campo_name_deve_conter_firstname_e_lastname(self, client):
         """O campo 'name' de cada usuário deve ter 'firstname' e 'lastname'."""
-        response = client.get("/users")
-        body = response.json()
+        body = assert_successful_list_response(client.get("/users"))
 
         for user in body:
-            assert "firstname" in user["name"]
-            assert "lastname" in user["name"]
+            assert_user_name_structure(user)
 
     def test_campo_address_deve_ter_estrutura_correta(self, client):
         """O campo 'address' deve conter cidade, rua, número e CEP."""
-        response = client.get("/users")
-        body = response.json()
+        body = assert_successful_list_response(client.get("/users"))
 
         for user in body:
-            address = user["address"]
-            for field in ("city", "street", "number", "zipcode"):
-                assert field in address, (
-                    f"Usuário id={user['id']} sem campo '{field}' no endereço."
-                )
+            assert_user_address_structure(user)
 
     def test_email_dos_usuarios_deve_conter_arroba(self, client):
         """O campo 'email' de cada usuário deve conter '@'."""
-        response = client.get("/users")
-        body = response.json()
+        body = assert_successful_list_response(client.get("/users"))
 
         for user in body:
-            assert "@" in user["email"], (
-                f"Usuário id={user['id']} tem email inválido: {user['email']}"
-            )
+            assert_user_email_valid(user)
 
     def test_deve_retornar_10_usuarios_por_padrao(self, client):
         """A API deve retornar exatamente 10 usuários na listagem padrão."""
-        response = client.get("/users")
-        body = response.json()
-
+        body = assert_successful_list_response(client.get("/users"))
         assert len(body) == 10
 
 
@@ -174,7 +160,7 @@ class TestGetSingleUser:
 
         assert response.status_code == 200
         assert body["id"] == user_id
-        assert USER_KEYS.issubset(body.keys())
+        assert_user_has_required_fields(body)
 
     def test_deve_retornar_404_para_id_inexistente(self, client):
         """GET /users/{id} com ID inexistente deve retornar 404."""
@@ -187,9 +173,7 @@ class TestGetSingleUser:
         response = client.get("/users/1")
         body = response.json()
 
-        geo = body["address"]["geolocation"]
-        assert "lat" in geo
-        assert "long" in geo
+        assert_user_geolocation(body)
 
 
 # ---------------------------------------------------------------------------
@@ -202,25 +186,21 @@ class TestPostUser:
 
     def test_deve_retornar_status_200_ao_criar_usuario(self, client):
         """POST /users com payload válido deve retornar 200 e o usuário criado."""
-        response = client.post("/users", json=NEW_USER_PAYLOAD)
-        body = response.json()
+        body = create_user(client, NEW_USER_PAYLOAD)
 
-        assert response.status_code == 200
         assert body["email"] == NEW_USER_PAYLOAD["email"]
         assert body["username"] == NEW_USER_PAYLOAD["username"]
 
     def test_usuario_criado_deve_ter_id_atribuido(self, client):
         """O usuário criado deve receber um ID gerado pela API."""
-        response = client.post("/users", json=NEW_USER_PAYLOAD)
-        body = response.json()
+        body = create_user(client, NEW_USER_PAYLOAD)
 
         assert "id" in body
         assert isinstance(body["id"], int)
 
     def test_nome_do_usuario_criado_deve_bater_com_payload(self, client):
         """O campo 'name' do usuário criado deve refletir o payload enviado."""
-        response = client.post("/users", json=NEW_USER_PAYLOAD)
-        body = response.json()
+        body = create_user(client, NEW_USER_PAYLOAD)
 
         assert body["name"]["firstname"] == NEW_USER_PAYLOAD["name"]["firstname"]
         assert body["name"]["lastname"] == NEW_USER_PAYLOAD["name"]["lastname"]
@@ -237,19 +217,15 @@ class TestPutUser:
     def test_deve_retornar_status_200_ao_atualizar_usuario(self, client):
         """PUT /users/{id} deve retornar 200 e os dados atualizados."""
         updated_payload = {**NEW_USER_PAYLOAD, "username": "usuario_atualizado_put"}
-        response = client.put("/users/1", json=updated_payload)
-        body = response.json()
+        body = update_user(client, 1, updated_payload)
 
-        assert response.status_code == 200
         assert body["username"] == "usuario_atualizado_put"
 
     def test_put_deve_atualizar_email(self, client):
         """PUT deve permitir atualizar o e-mail do usuário."""
         updated_payload = {**NEW_USER_PAYLOAD, "email": "novo_email@qa.com"}
-        response = client.put("/users/1", json=updated_payload)
-        body = response.json()
+        body = update_user(client, 1, updated_payload)
 
-        assert response.status_code == 200
         assert body["email"] == "novo_email@qa.com"
 
 
@@ -264,19 +240,15 @@ class TestPatchUser:
     def test_deve_retornar_status_200_ao_atualizar_parcialmente(self, client):
         """PATCH /users/{id} deve retornar 200 com campos atualizados."""
         partial_payload = {"phone": "61-88888-1234"}
-        response = client.patch("/users/1", json=partial_payload)
-        body = response.json()
+        body = patch_user(client, 1, partial_payload)
 
-        assert response.status_code == 200
         assert body["phone"] == "61-88888-1234"
 
     def test_patch_de_email_deve_atualizar_somente_email(self, client):
         """PATCH com apenas 'email' deve atualizar somente esse campo."""
         partial_payload = {"email": "patch_email@qa.com"}
-        response = client.patch("/users/1", json=partial_payload)
-        body = response.json()
+        body = patch_user(client, 1, partial_payload)
 
-        assert response.status_code == 200
         assert body["email"] == "patch_email@qa.com"
 
 
@@ -290,15 +262,11 @@ class TestDeleteUser:
 
     def test_deve_retornar_status_200_ao_deletar_usuario(self, client):
         """DELETE /users/{id} deve retornar 200 e o usuário deletado."""
-        response = client.delete("/users/1")
-        body = response.json()
+        body = delete_user(client, 1)
 
-        assert response.status_code == 200
         assert body["id"] == 1
 
     @pytest.mark.parametrize("user_id", [1, 2, 5])
     def test_delete_de_diferentes_usuarios_deve_retornar_200(self, client, user_id):
         """DELETE de diferentes IDs válidos deve sempre retornar 200."""
-        response = client.delete(f"/users/{user_id}")
-
-        assert response.status_code == 200
+        delete_user(client, user_id)

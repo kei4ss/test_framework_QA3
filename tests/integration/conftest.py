@@ -9,6 +9,10 @@ Inclui:
 import pytest
 import requests
 
+from src.infrastructure.requestManager.request_manager import RequestManager
+from src.services.auth_service import AuthService
+from src.services.user_service import UserService
+
 BASE_URL = "https://fakestoreapi.com"
 
 VALID_CREDENTIALS = {
@@ -55,3 +59,25 @@ def skip_if_api_unavailable(request):
                 "(https://fakestoreapi.com retornou status != 200 ou erro de rede). "
                 "Execute em uma máquina com acesso à internet pública."
             )
+
+@pytest.fixture
+def client():
+    """RequestManager configurado para a FakeStore API."""
+    return RequestManager(base_url=BASE_URL, timeout=15)
+
+@pytest.fixture
+def auth_service():
+    return AuthService()
+
+@pytest.fixture
+def user_service():
+    return UserService()
+
+@pytest.fixture
+def authenticated_client(auth_service):
+    token = auth_service.login(
+        VALID_CREDENTIALS["username"],
+        VALID_CREDENTIALS["password"],
+    )
+    auth_service.set_auth_token(token)
+    return auth_service._client
